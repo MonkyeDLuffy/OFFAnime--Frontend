@@ -83,7 +83,7 @@ export default function NotFound() {
         >
           404
         </p>
-        <h1 className="mt-3 max-w-xl text-2xl font-black tracking-[-0.01em] text-white sm:text-3xl">
+        <h1 className="type-display mt-3 max-w-xl text-[30px] sm:text-36px text-white">
           Looks like you&apos;ve wandered into an uncharted world.
         </h1>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
@@ -95,13 +95,13 @@ export default function NotFound() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/"
-            className="glass-btn glass-btn--bright inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-bold text-[#0b0b0f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+            className="glass-btn glass-btn--bright type-label inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm text-[#0b0b0f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
           >
             <Home className="h-4 w-4" aria-hidden="true" />
             Back to Home
           </Link>
           <BackButton
-            className="glass-btn glass-btn--dark inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+            className="glass-btn glass-btn--dark type-label inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Go Back

@@ -30,7 +30,7 @@ export default function EpisodeCard({
   const current =
     failedCount < candidates.length ? candidates[failedCount] : null;
 
-  const episodeNumber = episode.episodeNumber ?? episode.episode ?? 0;
+  const episodeNumber = episode.globalEpisodeNumber ?? episode.episodeNumber ?? episode.episode ?? 0;
   const runtime = episode.runtime ?? null;
   const runtimeText = runtime ? `${runtime}m` : null;
 
@@ -73,7 +73,7 @@ export default function EpisodeCard({
           {/* Episode number badge — bottom-left */}
           <span
             aria-hidden="true"
-            className="absolute left-2 bottom-2 z-10 rounded-full bg-[#050507]/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold tracking-[0.05em] text-white/90 transition-opacity duration-200 group-hover:opacity-100"
+            className="absolute left-2 bottom-2 z-10 rounded-full bg-[#050507]/90 backdrop-blur-sm px-2 py-0.5 type-label text-[11px] text-white/90 transition-opacity duration-200 group-hover:opacity-100"
           >
             E{episodeNumber}
           </span>
@@ -82,7 +82,7 @@ export default function EpisodeCard({
           {runtimeText ? (
             <span
               aria-hidden="true"
-              className="absolute right-2 bottom-2 z-10 rounded-full bg-[#050507]/90 backdrop-blur-sm px-2 py-0.5 text-[10px] font-bold tracking-[0.05em] text-white/90 transition-opacity duration-200 group-hover:opacity-100"
+              className="absolute right-2 bottom-2 z-10 rounded-full bg-[#050507]/90 backdrop-blur-sm px-2 py-0.5 type-label text-[11px] text-white/90 transition-opacity duration-200 group-hover:opacity-100"
             >
               {runtimeText}
             </span>
@@ -97,7 +97,7 @@ export default function EpisodeCard({
 
         {/* Text content below image */}
         <div className="mt-3 px-1">
-          <h3 className="truncate text-base font-semibold text-white/90 transition-colors duration-200 group-hover:text-white">
+          <h3 className="type-display truncate text-[19px] text-white/90 transition-colors duration-200 group-hover:text-white">
             {episode.title}
           </h3>
           {episode.overview ? (

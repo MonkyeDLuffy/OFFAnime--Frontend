@@ -2,12 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Scale } from "lucide-react";
 import ContactForm from "@/components/contact-form";
-import { SITE_EMAIL } from "@/lib/site";
+import { SITE_EMAIL, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
     "Get in touch with OFFAnime — general inquiries, feedback and copyright-related requests.",
+  alternates: { canonical: siteUrl("/contact") },
+  openGraph: {
+    title: "Contact — OFFANIME",
+    description:
+      "Get in touch with OFFAnime — general inquiries, feedback and copyright-related requests.",
+    url: siteUrl("/contact"),
+    siteName: "OFFANIME",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Contact — OFFANIME",
+    description:
+      "Get in touch with OFFAnime — general inquiries, feedback and copyright-related requests.",
+  },
 };
 
 /**
@@ -29,10 +44,10 @@ export default function ContactPage() {
 
       {/* Top padding clears the fixed navbar (56/64px) with breathing room. */}
       <div className="relative mx-auto max-w-3xl px-6 pb-16 pt-24 sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 xl:px-24">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+        <p className="type-label text-[11px] uppercase text-white/40">
           Contact
         </p>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.02em] text-white sm:text-5xl">
+        <h1 className="type-display mt-4 text-[36px] sm:text-48px text-white">
           Get in Touch
         </h1>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-white/65">
@@ -44,13 +59,13 @@ export default function ContactPage() {
 
         {/* The one real contact channel — prominent, one click away. */}
         <div className="mt-10 rounded-3xl border border-white/12 bg-white/[0.04] p-6 backdrop-blur-md sm:p-8">
-          <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+          <p className="flex items-center gap-2.5 type-label text-[11px] uppercase text-white/40">
             <Mail className="h-3.5 w-3.5" aria-hidden="true" />
             Email us
           </p>
           <a
             href={`mailto:${SITE_EMAIL}`}
-            className="mt-4 inline-block text-lg font-bold text-white underline decoration-white/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90 sm:text-2xl"
+            className="type-display mt-4 inline-block text-lg text-white underline decoration-white/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90 sm:text-2xl"
           >
             {SITE_EMAIL}
           </a>
@@ -71,7 +86,7 @@ export default function ContactPage() {
         {/* Form — composes an email in the visitor's own mail app (see the
             component's doc comment for the honest delivery model). */}
         <div className="mt-14">
-          <h2 className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl">
+          <h2 className="type-display text-xl text-white sm:text-2xl">
             Write to us
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-white/55">

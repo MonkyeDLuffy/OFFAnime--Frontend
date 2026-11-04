@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "postbuild": "node scripts/generate-sitemaps.js",
     "start": "next start",
     "lint": "eslint"
   },

@@ -24,7 +24,7 @@ export default function HeroSlideContent({ slide }: { slide: HeroSlide }) {
             fallbackSrc={slide.logoFallbackUrl}
             title={slide.title}
           />
-          <h1 className="mt-3 text-lg font-medium text-white/90 sm:text-xl">
+          <h1 className="type-display mt-3 text-3xl text-white/90 sm:text-4xl lg:text-[42px]">
             {slide.title}
           </h1>
         </>
@@ -48,7 +48,7 @@ export default function HeroSlideContent({ slide }: { slide: HeroSlide }) {
         <Link
           href={`/anime/${slide.anilistId}`}
           prefetch={true}
-          className="glass-btn inline-flex h-12 items-center gap-2.5 rounded-full px-8 text-sm font-semibold text-white sm:h-[52px] sm:px-10 sm:text-[15px]"
+          className="glass-btn type-label inline-flex h-12 items-center gap-2.5 rounded-full px-8 text-sm text-white sm:h-[52px] sm:px-10 sm:text-[15px]"
         >
           <Play className="h-[18px] w-[18px] fill-current" aria-hidden="true" />
           Play Now

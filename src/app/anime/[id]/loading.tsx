@@ -7,13 +7,10 @@ import AnimeDetailsSkeleton from "@/components/anime/AnimeDetailsSkeleton";
  *
  * Next.js renders this automatically during client-side transitions to the
  * details page, so the moment a user clicks an anime card they see a premium
- * skeleton instead of a frozen screen. The shell streams in from the server
- * behind it and replaces the skeleton once the details data is ready — no
- * artificial delay, no waiting for the API before navigating.
- *
- * It is intentionally a skeleton shell (not the shared error state) so the
- * transition to content is seamless: matching layout, matching dimensions,
- * minimal cumulative layout shift.
+ * skeleton instead of an empty black screen. The shell streams in from the
+ * server behind it and replaces the skeleton once the details data is ready.
+ * No artificial delay — the skeleton shows immediately and is replaced as
+ * soon as the data loads.
  */
 
 export default function AnimeDetailsLoading() {

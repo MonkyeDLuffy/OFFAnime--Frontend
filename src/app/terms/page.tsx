@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Info, Mail } from "lucide-react";
-import { SITE_EMAIL } from "@/lib/site";
+import { SITE_EMAIL, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "The terms that govern your use of OFFAnime — the service, third-party content, responsibilities and copyright process.",
+  alternates: { canonical: siteUrl("/terms") },
+  openGraph: {
+    title: "Terms of Service — OFFANIME",
+    description:
+      "The terms that govern your use of OFFAnime — the service, third-party content, responsibilities and copyright process.",
+    url: siteUrl("/terms"),
+    siteName: "OFFANIME",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Service — OFFANIME",
+    description:
+      "The terms that govern your use of OFFAnime — the service, third-party content, responsibilities and copyright process.",
+  },
 };
 
 /**
@@ -27,10 +42,10 @@ export default function TermsPage() {
 
       {/* Top padding clears the fixed navbar (56/64px) with breathing room. */}
       <div className="relative mx-auto max-w-3xl px-6 pb-16 pt-24 sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 xl:px-24">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+        <p className="type-label text-[11px] uppercase text-white/40">
           Legal
         </p>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.02em] text-white sm:text-5xl">
+        <h1 className="type-display mt-4 text-[36px] sm:text-48px text-white">
           Terms of Service
         </h1>
 
@@ -63,7 +78,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-acceptance">
             <h2
               id="terms-acceptance"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               1. Acceptance of the terms
             </h2>
@@ -86,7 +101,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-service">
             <h2
               id="terms-service"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               2. Description of the service
             </h2>
@@ -103,7 +118,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-third-party">
             <h2
               id="terms-third-party"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               3. Third-party content, links &amp; streaming providers
             </h2>
@@ -122,7 +137,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-responsibilities">
             <h2
               id="terms-responsibilities"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               4. User responsibilities &amp; prohibited misuse
             </h2>
@@ -140,7 +155,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-dmca">
             <h2
               id="terms-dmca"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               5. Copyright complaints &amp; DMCA requests
             </h2>
@@ -164,7 +179,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-availability">
             <h2
               id="terms-availability"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               6. Service availability &amp; changes
             </h2>
@@ -181,7 +196,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-liability">
             <h2
               id="terms-liability"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               7. Limitation of liability
             </h2>
@@ -201,7 +216,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-changes">
             <h2
               id="terms-changes"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               8. Changes to the terms
             </h2>
@@ -217,7 +232,7 @@ export default function TermsPage() {
           <section aria-labelledby="terms-contact">
             <h2
               id="terms-contact"
-              className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+              className="type-display text-xl text-white sm:text-2xl"
             >
               9. Contact
             </h2>
@@ -234,7 +249,7 @@ export default function TermsPage() {
             </p>
             <a
               href={`mailto:${SITE_EMAIL}`}
-              className="glass-btn glass-btn--dark mt-6 inline-flex items-center gap-2.5 rounded-full px-5 py-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+              className="glass-btn glass-btn--dark type-label mt-6 inline-flex items-center gap-2.5 rounded-full px-5 py-3 text-sm text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               {SITE_EMAIL}

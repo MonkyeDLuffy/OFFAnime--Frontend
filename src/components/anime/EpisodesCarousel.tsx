@@ -44,15 +44,24 @@ export default function EpisodesCarousel({
   const skeletonCount = 8;
   const displayEpisodes: (AnimeEpisode | EpisodeSkeletonItem)[] = isLoading
     ? Array.from({ length: skeletonCount }, (_, i) => ({ episode: i + 1 }))
-    : (episodes ?? []) as (AnimeEpisode | EpisodeSkeletonItem)[];
+    : [...(episodes ?? [])]
+        .filter(
+          (ep): ep is AnimeEpisode =>
+            typeof ep.globalEpisodeNumber === "number" &&
+            ep.globalEpisodeNumber > 0,
+        )
+        .sort((a, b) => a.globalEpisodeNumber - b.globalEpisodeNumber);
 
   const { scrollerRef, canScrollLeft, canScrollRight, scrollByPage } =
     useCarouselScroll(displayEpisodes.length);
 
   // Build a user-friendly label from the first/last visible episode numbers
-  const firstEp = displayEpisodes[0]?.episode ?? 1;
+  // using the continuous global episode number. (Only reached when not
+  // loading, so every entry is a real AnimeEpisode.)
+  const firstEp = (displayEpisodes[0] as AnimeEpisode)?.globalEpisodeNumber ?? 1;
   const lastEp =
-    displayEpisodes[displayEpisodes.length - 1]?.episode ?? firstEp;
+    (displayEpisodes[displayEpisodes.length - 1] as AnimeEpisode)
+      ?.globalEpisodeNumber ?? firstEp;
   const listLabel = `Episodes ${firstEp}–${lastEp}`;
 
   return (
@@ -64,7 +73,7 @@ export default function EpisodesCarousel({
         <div className="details-section">
           <h2
             id="episodes-heading"
-            className="mb-5 details-section-heading sm:text-3xl lg:text-4xl"
+            className="mb-5 details-section-heading"
           >
             Episodes
           </h2>
@@ -96,13 +105,19 @@ export default function EpisodesCarousel({
                   aria-label={listLabel}
                   className="details-section-carousel no-scrollbar flex gap-5 overflow-x-auto overflow-y-clip overscroll-x-contain px-6 pb-16 pt-4 sm:gap-6 sm:px-10 sm:pb-20 lg:gap-7 lg:px-16 xl:px-24"
                 >
-                  {displayEpisodes.map((ep) =>
-                    isLoading ? (
-                      <EpisodeSkeleton key={ep.episode} />
+                  {displayEpisodes.map((ep) => {
+                    // Only real AnimeEpisode entries reach the non-skeleton
+                    // branch, so narrow the type for the episode fields.
+                    const episode = ep as AnimeEpisode;
+                    return isLoading ? (
+                      <EpisodeSkeleton key={episode.episode} />
                     ) : (
-                      <EpisodeCard key={ep.episode} episode={ep as AnimeEpisode} />
-                    )
-                  )}
+                      <EpisodeCard
+                        key={episode.globalEpisodeNumber}
+                        episode={episode}
+                      />
+                    );
+                  })}
                 </ul>
 
                 {canScrollLeft ? (

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Play, Video, Volume2, VolumeX, X } from "lucide-react";
 import type { Anime, HeroSlide, TrailerSource } from "@/lib/types";
@@ -36,7 +37,7 @@ import { getDisplayGenresJoined } from "@/lib/anime";
  *      panel sits right-aligned on desktop and stacks below on mobile.
  *
  * Controls: Play (playback flow arrives later — an honest disabled control
- * with a tooltip), Watch Later (the shared localStorage-backed toggle) and
+ * with a tooltip), Watch Later (the account-backed watchlist toggle) and
  * Watch Trailer (toggles the background video; clicking again closes it).
  */
 
@@ -172,18 +173,18 @@ export default function AnimeDetailsHero({
                   title={slide.title}
                 />
                 {genres ? (
-                  <p className="mt-3 text-xs font-medium tracking-[0.12em] text-white/65 uppercase sm:text-sm">
+                  <p className="type-label mt-3 text-xs text-white/65 uppercase sm:text-sm">
                     {genres}
                   </p>
                 ) : null}
-                <h1 className="mt-2 text-lg font-medium text-white/90 sm:text-xl">
+                <h1 className="type-display mt-2 text-[30px] sm:text-36px lg:text-42px">
                   {slide.title}
                 </h1>
               </>
             ) : (
               <>
                 {genres ? (
-                  <p className="mt-1 text-xs font-medium tracking-[0.12em] text-white/65 uppercase sm:text-sm">
+                  <p className="type-label mt-1 text-xs text-white/65 uppercase sm:text-sm">
                     {genres}
                   </p>
                 ) : null}
@@ -192,27 +193,38 @@ export default function AnimeDetailsHero({
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-2.5 sm:mt-7 sm:gap-3">
-              {/* Play — the playback flow does not exist yet; rendered as an
-                  honest disabled control (no invented route or player). */}
-              <span className="group relative">
-                <button
-                  type="button"
-                  disabled
-                  aria-label="Play (coming soon)"
-                  className="glass-btn glass-btn--bright inline-flex h-12 items-center gap-2.5 rounded-full px-7 text-sm font-semibold sm:h-[52px] sm:px-9 sm:text-[15px]"
-                >
-                  <Play
-                    className="h-[18px] w-[18px] fill-current"
-                    aria-hidden="true"
-                  />
-                  Play
-                </button>
-                <SoonTooltip>Play — coming soon</SoonTooltip>
-              </span>
+              {/* Play — opens the watch page for this anime at episode 1. */}
+              <Link
+                href={`/anime/${slide.anilistId}/watch?ep=1&language=sub`}
+                prefetch={true}
+              >
+                <span className="group relative">
+                  <button
+                    type="button"
+                    aria-label={`Play ${slide.title}`}
+                    className="glass-btn glass-btn--bright type-label inline-flex h-12 items-center gap-2.5 rounded-full px-7 text-sm sm:h-[52px] sm:px-9 sm:text-[15px]"
+                  >
+                    <Play
+                      className="h-[18px] w-[18px] fill-current"
+                      aria-hidden="true"
+                    />
+                    Play
+                  </button>
+                  <SoonTooltip>Watch now</SoonTooltip>
+                </span>
+              </Link>
 
-              {/* Watch Later — the shared watchlist toggle (localStorage). */}
+              {/* Watch Later — the account-backed watchlist toggle. The
+                  canonical details payload enriches the snapshot metadata
+                  (seasonYear / format) beyond what the hero slide carries. */}
               <WatchLaterButton
-                slide={slide}
+                slide={{
+                  anilistId: slide.anilistId,
+                  title: slide.title,
+                  posterUrl: slide.posterUrl,
+                  year: slide.year ?? info.seasonYear,
+                  format: info.format,
+                }}
                 className="h-12 w-12 sm:h-[52px] sm:w-[52px]"
               />
 
@@ -223,7 +235,7 @@ export default function AnimeDetailsHero({
                   type="button"
                   onClick={toggleTrailer}
                   aria-pressed={trailerOn}
-                  className="glass-btn inline-flex h-12 items-center gap-2.5 rounded-full px-6 text-sm font-semibold text-white sm:h-[52px] sm:px-8 sm:text-[15px]"
+                  className="glass-btn type-label inline-flex h-12 items-center gap-2.5 rounded-full px-6 text-sm text-white sm:h-[52px] sm:px-8 sm:text-[15px]"
                 >
                   {trailerOn ? (
                     <X className="h-[18px] w-[18px]" aria-hidden="true" />

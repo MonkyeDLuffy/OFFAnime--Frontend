@@ -1,17 +1,101 @@
 @import "tailwindcss";
 
+/* ---- Fornire Light (single free weight, 300) --------------------------------
+   Editorial Didone serif for ALL headings and titles across OFFANIME.
+   Weight 300 only — the free release ships exactly one cut (Fornire Light);
+   other weights are a commercial upgrade, so heading text must resolve to
+   300 (heavier requests would be synthesised — smeared serifs). See
+   public/fonts/README.md for source + license. */
+@font-face {
+  font-family: "Fornire";
+  src:
+    url("/fonts/Fornire-Light.woff2") format("woff2"),
+    url("/fonts/Fornire-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Two typography roles (global architecture):
+   - --font-heading → Fornire serif — page titles, section headings, card
+     titles, detail/watch headings, empty- and error-state headings;
+   - --font-body    → the original Inter sans — descriptions, metadata,
+     labels, buttons, controls, inputs, ordinary paragraphs.
+   The body stack refers to the next/font variable at ONE nesting level (the
+   same shape the --font-sans utility already uses — deeper nesting fails to
+   resolve in this toolchain). --font-heading is a pure literal so it can be
+   consumed from :root rules without a var() chain. */
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-heading: "Fornire", ui-serif, Georgia, "Times New Roman", serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
 }
 
 :root {
   color-scheme: dark;
+  /* Same literal heading stack as the theme token above (duplicated on
+     purpose: :root custom properties that nest other var()s fail to resolve
+     at computed time in this toolchain, so the token carries no var()). */
+  --font-heading: "Fornire", ui-serif, Georgia, "Times New Roman", serif;
 }
 
 body {
   background-color: #050507;
   color: #ffffff;
+}
+
+/* ---- Global heading typography — Fornire -----------------------------------
+   Reusable classes so headings/titles share one definition:
+   - .type-display  → headings, page/anime titles, section titles
+   - .type-heading  → alias for generic semantics uses (same face)
+   Fornire ships exactly one weight (Light, 300) — the class pins it so stray
+   bold utilities cannot trigger synthetic (smeared) bolding. Serif display
+   faces read best untracked at large sizes and need a touch more leading
+   (tall 848-unit ascenders / -326 descenders). Sizes are declared per
+   surface; only family/weight/rhythm is shared here.
+
+   Site heading scale (desktop reference; responsive steps step down through
+   the sm breakpoint):
+      main detail/hero title        … 36 / 48 / 60  (SlideLogo TitleHeading)
+      supplementary detail title  … 24 / 30        (English title h1 under logo)
+      section H2 (home + details) … 26 / 34 / 40
+      watch page title            … 26 / 32 / 36
+      card titles                 … 19px
+      subsection/older headings   … 22 / 28
+      legal/contact page titles   … 36 / 48
+      watchlist/account titles    … 32 / 40
+      search page title           … 34 / 40
+      modal/empty-state headings  … 24 – 36 */
+.type-display {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+.type-heading {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+/* Labels, eyebrows, chips, admin tags — deliberately BODY type (task rule:
+   navigation labels, buttons, form labels and metadata are not headings).
+   Inter at 400 with the previous tracking keeps their quiet-caps voice. */
+.type-label {
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+}
+
+/* Guard: any element resolving to the Fornire family is pinned to its single
+   real weight — 700/900 requests would otherwise fall back to faux-bold
+   synthesis over the one shipped cut. */
+.font-heading {
+  font-weight: 300;
 }
 
 /* Full-viewport hero height with graceful fallbacks (100vh → 100svh). */
@@ -82,7 +166,9 @@ body {
 
 /* ---- TOP 10 | CONTENT TODAY ---- */
 
-/* Outlined display type for the section heading. */
+/* Outlined display type for the section heading. MUST stay the body
+   system font — this ranking section is a deliberate typography exception
+   and never uses Fornire (see the exception rule below). */
 .top10-title {
   color: transparent;
   -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.6);
@@ -127,7 +213,8 @@ body {
    can never leak scrollable overflow into the carousel viewport — that leak
    is what made the row vertically scrollable. Digits sit flush with the
    poster's bottom edge. Inactive ranks are hollow outlines; hover/focus
-   fills and brightens them. */
+   fills and brightens them. Uses Inter Black at weight 900 with tight
+   tracking — part of the TOP 10 typography exception (system font only). */
 .top10-rank {
   position: absolute;
   left: 0;
@@ -153,6 +240,23 @@ body {
 .top10-card:focus-within .top10-rank {
   color: rgb(255 255 255 / 0.12);
   -webkit-text-stroke-color: rgb(255 255 255 / 0.9);
+}
+
+/* ---- TOP 10 typography exception — DO NOT EDIT -----------------------------
+   The TOP 10 ranking section (`.top10-title` outline heading, `.top10-rank` giant
+   digits, and the not-found "404" reusing the same style) is a deliberate
+   exception: `.top10-title` is now rendered in Fornire (it is a true section
+   heading) while `.top10-rank` outline digits stay in Inter Black 900 with
+   their hollow-stroke treatment — part of the TOP 10 typography exception.
+   These rules sit LAST among top10 rules so no global font change can knock
+   the rank numerals back to Fornire. Never widen .top10-title to Fornire.
+   .top10-title is intentionally excluded because its letterforms are
+   designed around Inter's geometry at weight 900. */
+.top10-title,
+.top10-rank {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  font-weight: 900;
 }
 
 .top10-card a:focus-visible {
@@ -867,23 +971,31 @@ body.trailer-ambient-active section {
 /* ---- Section headings — premium typography for details sections (Episodes,
    Recommended Anime) ---- */
 
-/* Premium, cinematic section headings using the project's Inter font:
-   clean geometric sans-serif, strong weight, tracked letterforms, subtle
-   letter-spacing. These match the existing dark streaming-platform aesthetic
-   without decorative effects. */
+/* Cinematic section headings — Fornire serif at the heading scale.
+   Episodes / Recommended-Anime section titles read as true headings now
+   (serif, 300 weight, modest tracking). Long-form body copy stays in Inter. */
 .details-section-heading {
-  @apply font-sans font-black tracking-[-0.02em] text-white;
-  letter-spacing: -0.02em;
+  @apply text-white;
+  font-family: var(--font-heading);
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: 1.15;
 }
 
 .details-section-heading:where(h2) {
-  font-size: 2rem;
-  line-height: 1.1;
+  font-size: 1.5rem;
+  line-height: 1.12;
 }
 
 @media (min-width: 640px) {
   .details-section-heading:where(h2) {
-    font-size: 3rem;
+    font-size: 1.875rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .details-section-heading:where(h2) {
+    font-size: 2.25rem;
   }
 }
 
@@ -985,6 +1097,345 @@ body.trailer-ambient-active section {
   }
 }
 
+/* ---- Continue Watching — cinematic card interactions ---- */
+
+/**
+ * Premium streaming-card hover for the Continue Watching carousel. One
+ * motion language across the card: a single tuned easing curve, and only
+ * transform / opacity / color / shadow transitions (never layout properties),
+ * so hovering can never shift neighbours or reflow the row.
+ *
+ *   - The whole card lifts as one unit; the artwork zooms subtly INSIDE its
+ *     static rounded frame (the frame never resizes — the zoom is clipped by
+ *     its overflow, giving the gentle parallax/glide feel without overlap).
+ *   - Hover-in/hover-out share the same curve, so returning glides naturally.
+ *   - prefers-reduced-motion users get the state changes (overlay, remove
+ *     control, brightness) without any movement — every transform target
+ *     lives inside the no-preference block.
+ *   - The scroll row's pt-4 / pb-6 padding already reserves the lift and
+ *     shadow space, so no carousel overflow style needs to change.
+ */
+
+.cw-card {
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The hovered/focused card paints above its neighbours so its shadow and
+   frame edge stay clean across the row gaps. */
+.cw-card:hover,
+.cw-card:focus-within {
+  z-index: 20;
+}
+
+/* Visible keyboard focus without double-firing the link default: the frame
+   itself rings, identical rounded corners. */
+.cw-link {
+  display: block;
+  position: relative;
+}
+
+.cw-link:focus-visible {
+  outline: none;
+}
+
+.cw-link:focus-visible .cw-frame {
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+
+/* Artwork frame: constant shape on hover; only its shadows/edge respond. */
+.cw-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #0b0b11;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  transition:
+    box-shadow 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Soft, elegant cinematic depth; the ring keeps the edge crisp on dark art. */
+.cw-card:hover .cw-frame,
+.cw-card:focus-within .cw-frame {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 22px 44px -8px rgba(0, 0, 0, 0.55),
+    0 10px 22px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+/* Artwork: gentle parallax glide inside the frame. The origin sits slightly
+   below center so the zoom drifts away from the top-left badge instead of
+   under it. */
+.cw-media {
+  position: absolute;
+  inset: 0;
+}
+
+.cw-media img {
+  object-fit: cover;
+  object-position: center;
+  transform-origin: 50% 60%;
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Very subtle cinematic gradient overlay: a soft top dim, cleared through
+   the middle, a low weighted base — letterbox atmosphere, never a flat dim.
+   Double verdict surfaced with the continue chip, no extra layers. */
+.cw-cine {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background-image: linear-gradient(
+    180deg,
+    rgba(5, 5, 7, 0.3) 0%,
+    rgba(5, 5, 7, 0.1) 34%,
+    rgba(5, 5, 7, 0) 52%,
+    rgba(5, 5, 7, 0.52) 100%
+  );
+  transition: opacity 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cw-card:hover .cw-cine,
+.cw-card:focus-within .cw-cine {
+  opacity: 1;
+}
+
+/* The centered continue chip keeps its own glass fill so its contrast never
+   depends on the artwork brightness (same Liquid Glass skin as .glass-btn). */
+.cw-chip {
+  display: inline-flex;
+  transform: translateZ(0);
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background-color: rgba(8, 8, 14, 0.52);
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 38%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Hover-driven movement lives in the transform-only block. */
+@media (prefers-reduced-motion: no-preference) {
+  .cw-card:hover,
+  .cw-card:focus-within {
+    transform: translateY(-6px);
+  }
+
+  .cw-card:hover .cw-media img,
+  .cw-card:focus-within .cw-media img {
+    transform: scale(1.04);
+    filter: brightness(1.05);
+  }
+}
+
+/* Episode badge — compact liquid glass pill, anchored top-left, identical on
+   every card. The dark frosted fill + thin rim keeps it readable on bright
+   and dark artwork alike; tabular digits stop wide episodes from wobbling. */
+.cw-ep-badge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(8, 8, 14, 0.42);
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 40%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.02) 55%,
+      rgba(255, 255, 255, 0.07) 100%
+    );
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+    0 3px 10px rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cw-ep-tag {
+  opacity: 0.68;
+}
+
+/* Quiet glint when the card is hovered/focused: brighter rim, deeper fill. */
+.cw-card:hover .cw-ep-badge,
+.cw-card:focus-within .cw-ep-badge {
+  border-color: rgba(255, 255, 255, 0.32);
+  background-color: rgba(10, 10, 18, 0.56);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cw-card:hover .cw-ep-badge,
+  .cw-card:focus-within .cw-ep-badge {
+    transform: translateY(-1px);
+  }
+}
+
+/* Title: already full white, so "slightly brighter" reads as a soft halo. */
+.cw-title {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0);
+  transition: text-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cw-card:hover .cw-title,
+.cw-card:focus-within .cw-title {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.18);
+}
+
+/* Episode subtitle brightens and clarifies on hover/focus. */
+.cw-sub {
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cw-card:hover .cw-sub,
+.cw-card:focus-within .cw-sub {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Remove control — glass circle in the top-right corner. Hidden and inert
+   while the card is idle (no phantom clicks on invisible controls), smoothly
+   revealed on card hover or keyboard focus, always visible on touch devices
+   where hover does not exist. */
+.cw-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(8, 8, 14, 0.48);
+  background-image:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0) 38%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.07) 100%
+    );
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 4px 12px rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cw-card:hover .cw-remove,
+.cw-card:focus-within .cw-remove {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Direct hover: gentle brightness lift (no filter animation — the fill
+   transitions). */
+.cw-remove:hover {
+  border-color: rgba(255, 255, 255, 0.38);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.cw-remove:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  outline: 2px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 2px;
+}
+
+/* Touch devices have no hover: the remove control stays permanently visible. */
+@media (pointer: coarse) {
+  .cw-remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Idle float, settling to rest on reveal; a small scale on direct hover
+     of the control itself. */
+  .cw-remove {
+    transform: translateY(-2px);
+  }
+
+  .cw-card:hover .cw-remove,
+  .cw-card:focus-within .cw-remove {
+    transform: translateY(0);
+  }
+
+  .cw-card:hover .cw-remove:hover,
+  .cw-card:focus-within .cw-remove:hover {
+    transform: translateY(0) scale(1.08);
+  }
+}
+
+/* ---- End Continue Watching interactions ---- */
+
 /* Slowly rotating conic arc ring around the 404 type. The radial mask
    hollows the disc into a thin ring so only the arc is visible. */
 .nf-portal-ring {
@@ -1068,5 +1519,992 @@ body.trailer-ambient-active section {
   .nf-halo,
   .nf-star {
     animation: none;
+  }
+}
+
+/* ---- Watch page — cinematic two-column player layout (liquid glass) ---- */
+
+/* One restrained accent (ice blue) is reserved for the selected episode and
+   the active playback controls; everything else keeps the site's monochrome
+   liquid-glass language. Values are hardcoded as rgb(...) per the file's
+   convention — accent border ≈ rgb(125 211 252 / …), accent glow ≈
+   rgb(56 189 248 / …). */
+
+@keyframes watch-enter-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* One-shot entrances: header → player column → episode panel, slightly
+   staggered so the page settles in without any bouncing. */
+.watch-enter {
+  animation: watch-enter-in 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.watch-enter--player {
+  animation: watch-enter-in 680ms cubic-bezier(0.22, 1, 0.36, 1) 70ms both;
+}
+
+.watch-enter--panel {
+  animation: watch-enter-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-enter,
+  .watch-enter--player,
+  .watch-enter--panel {
+    animation: none;
+  }
+}
+
+/* Player frame — glass bezel over the MegaPlay embed. The overlay never
+   intercepts clicks (pointer-events: none), so the provider's own native
+   controls stay fully functional; it only adds the rim light that makes the
+   bezel read as glass next to the page's other surfaces. */
+.watch-player-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.09) 0%,
+      rgb(255 255 255 / 0) 6%
+    ),
+    radial-gradient(
+      110% 70% at 50% 0%,
+      rgb(255 255 255 / 0.045) 0%,
+      rgb(255 255 255 / 0) 55%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.05),
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 -1px 0 rgb(0 0 0 / 0.3);
+}
+
+/* Soft expanding halo behind the start-play button (motion-safe only). */
+@keyframes watch-play-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  70%,
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .watch-play-pulse {
+    animation: watch-play-pulse 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+}
+
+/* SUB/DUB segmented control — one glass capsule with a sliding frosted
+   thumb. Geometry contract: 5px padding + 3px gap → thumb width is
+   calc((100% - 13px) / 2) and the DUB position adds the gap back, so both
+   rest positions sit symmetrically inside the capsule. */
+.watch-seg {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 9999px;
+  background-color: rgb(10 10 16 / 0.5);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.13),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    0 10px 28px rgb(0 0 0 / 0.35);
+}
+
+.watch-seg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.1) 0%,
+      rgb(255 255 255 / 0) 24%
+    ),
+    linear-gradient(115deg, rgb(255 255 255 / 0.09) 0%, rgb(255 255 255 / 0) 40%);
+}
+
+.watch-seg-thumb {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  z-index: 0;
+  width: calc((100% - 13px) / 2);
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 9999px;
+  background-color: rgb(255 255 255 / 0.9);
+  background-image:
+    linear-gradient(115deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 42%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.95) 0%,
+      rgb(214 242 255 / 0.82) 55%,
+      rgb(236 250 255 / 0.9) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(0 0 0 / 0.06),
+    0 0 16px rgb(56 189 248 / 0.35),
+    0 6px 18px rgb(0 0 0 / 0.35);
+  transition: transform 340ms cubic-bezier(0.34, 1.3, 0.64, 1);
+  will-change: transform;
+}
+
+.watch-seg-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: rgb(255 255 255 / 0.5);
+  transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.watch-seg-btn--on {
+  color: #08202e;
+}
+
+.watch-seg-btn:not(:disabled):hover {
+  color: rgb(255 255 255 / 0.85);
+}
+
+.watch-seg-btn--on:not(:disabled):hover {
+  color: #08202e;
+}
+
+.watch-seg-btn:focus-visible {
+  outline: 2px solid rgb(125 211 252 / 0.9);
+  outline-offset: -3px;
+}
+
+.watch-seg-btn:disabled {
+  cursor: not-allowed;
+  color: rgb(255 255 255 / 0.22);
+}
+
+/* Accent marker for the header's language indicator. */
+.watch-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #a7e6ff 0%, #38bdf8 100%);
+  box-shadow:
+    0 0 10px rgb(56 189 248 / 0.55),
+    inset 0 0 2px rgb(255 255 255 / 0.8);
+}
+
+/* Server chips — the shared glass-btn skin plus the accent treatment for
+   the active provider. Declared after the .glass-btn rules so the accent
+   state wins the cascade; the higher-specificity hover keeps the glow. */
+.glass-btn.watch-chip--on {
+  border-color: rgb(125 211 252 / 0.55);
+  background-color: rgb(56 189 248 / 0.16);
+  color: #c9edff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    0 0 14px rgb(56 189 248 / 0.24),
+    0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.glass-btn.watch-chip--on:not(:disabled):hover {
+  border-color: rgb(125 211 252 / 0.8);
+  background-color: rgb(56 189 248 / 0.24);
+  color: #e2f6ff;
+  filter: brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 0 18px rgb(56 189 248 / 0.3),
+    0 10px 28px rgb(0 0 0 / 0.4);
+}
+
+/* Episode tiles — individual rounded glass blocks. No backdrop-filter here
+   by design: a blurred filter on hundreds of tiles is expensive, and the
+   frosted panel behind the grid already provides the glass depth. */
+.watch-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background-color: rgb(255 255 255 / 0.035);
+  background-image: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.05) 0%,
+    rgb(255 255 255 / 0) 42%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    0 3px 10px rgb(0 0 0 / 0.28);
+  color: rgb(255 255 255 / 0.5);
+  transition:
+    background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.watch-tile:hover {
+  border-color: rgb(255 255 255 / 0.26);
+  background-color: rgb(255 255 255 / 0.09);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 6px 18px rgb(0 0 0 / 0.4);
+}
+
+.watch-tile:active {
+  transform: scale(0.93);
+  transition-duration: 90ms;
+}
+
+.watch-tile:focus-visible {
+  outline: 2px solid rgb(125 211 252 / 0.9);
+  outline-offset: 2px;
+}
+
+.watch-tile--current {
+  border-color: rgb(125 211 252 / 0.75);
+  background-color: rgb(56 189 248 / 0.13);
+  background-image:
+    linear-gradient(115deg, rgb(255 255 255 / 0.16) 0%, rgb(255 255 255 / 0) 44%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.08) 0%,
+      rgb(255 255 255 / 0) 42%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 0 0 1px rgb(56 189 248 / 0.3),
+    0 0 20px rgb(56 189 248 / 0.28),
+    0 8px 22px rgb(0 0 0 / 0.42);
+  color: #edfaff;
+}
+
+.watch-tile--current:hover {
+  border-color: rgb(125 211 252 / 0.95);
+  background-color: rgb(56 189 248 / 0.2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    0 0 0 1px rgb(56 189 248 / 0.4),
+    0 0 26px rgb(56 189 248 / 0.36),
+    0 8px 22px rgb(0 0 0 / 0.42);
+}
+
+/* Hover scaling is motion-safe only, and suppressed while pressed so the
+   press feedback always wins when both states match. */
+@media (prefers-reduced-motion: no-preference) {
+  .watch-tile:hover:not(:active) {
+    transform: translateY(-2px) scale(1.06);
+  }
+
+  .watch-tile--current:hover:not(:active) {
+    transform: translateY(-2px) scale(1.05);
+  }
+}
+
+/* Panel scrollbar — thin translucent thumb over the dark glass
+   (scrollbar-color covers Firefox; the webkit rules cover the rest). */
+.watch-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+}
+
+.watch-panel-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.watch-panel-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background: rgb(255 255 255 / 0.16);
+  background-clip: padding-box;
+}
+
+.watch-panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Watch inputs (episode search, range select) — compact glass fields with
+   a restrained accent focus ring. */
+.watch-input {
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 10px;
+  background-color: rgb(255 255 255 / 0.05);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  color: #ffffff;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.watch-input::placeholder {
+  color: rgb(255 255 255 / 0.3);
+}
+
+.watch-input:hover {
+  border-color: rgb(255 255 255 / 0.22);
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.watch-input:focus {
+  outline: none;
+  border-color: rgb(125 211 252 / 0.6);
+  background-color: rgb(255 255 255 / 0.08);
+  box-shadow:
+    0 0 0 3px rgb(56 189 248 / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+
+/* ---- Authentication — premium form fields (liquid glass) ---- */
+
+/* The auth pages share the site's glass language: translucent white fills,
+   hairline rims, inner top-light, restrained ice-blue focus ring (the same
+   accent used by the watch page's controls) and the contact form's red
+   treatment for campo validation errors via aria-invalid. */
+.auth-input {
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 12px;
+  background-color: rgb(255 255 255 / 0.05);
+  background-image: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.035) 0%,
+    rgb(255 255 255 / 0) 40%
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+  color: #ffffff;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease,
+    filter 200ms ease;
+}
+
+.auth-input::placeholder {
+  color: rgb(255 255 255 / 0.3);
+}
+
+.auth-input:hover:enabled {
+  border-color: rgb(255 255 255 / 0.26);
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.auth-input:focus:enabled {
+  outline: none;
+  border-color: rgb(125 211 252 / 0.55);
+  background-color: rgb(255 255 255 / 0.08);
+  box-shadow:
+    0 0 0 3px rgb(56 189 248 / 0.13),
+    inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+
+.auth-input:focus-visible {
+  outline: none;
+}
+
+.auth-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Offline validation — red tint the moment the field is marked invalid. */
+.auth-input[aria-invalid="true"] {
+  border-color: rgb(248 113 113 / 0.6);
+  box-shadow:
+    0 0 0 3px rgb(248 113 113 / 0.11),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* Signed-in navbar avatar — a chip with a small identity ring so the
+   initial reads as the user, not a decoration (same geometry as nav-chip). */
+.nav-avatar {
+  background-color: rgb(255 255 255 / 0.16);
+  background-image: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.22) 0%,
+    rgb(255 255 255 / 0.1) 55%,
+    rgb(255 255 255 / 0.18) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08),
+    0 2px 8px rgb(0 0 0 / 0.3);
+}
+
+/* Account dropdown — denser Liquid Glass than .glass-panel: the menu
+   overlaps busy artwork and stays readable (extra-dark fill under the
+   same blur/saturation/rim treatment). */
+.profile-dropdown {
+  border: 1px solid rgb(255 255 255 / 0.17);
+  background-color: rgb(11 11 16 / 0.93);
+  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  backdrop-filter: blur(22px) saturate(165%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    0 24px 60px rgb(0 0 0 / 0.55),
+    0 4px 18px rgb(0 0 0 / 0.42);
+}
+
+@keyframes profile-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.profile-pop {
+  transform-origin: top right;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .profile-pop {
+    animation: profile-pop-in 230ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* ---- Toasts — notifications viewport (auth + global actions) ---- */
+
+.toast-in {
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background-color: rgb(12 12 18 / 0.92);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.13),
+    inset 0 -1px 0 rgb(255 255 255 / 0.03),
+    0 18px 44px rgb(0 0 0 / 0.5);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast-in {
+    animation: toast-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+/* ---- Global search — cinematic navbar popup + shared result rows ----------
+   One centered dark-glass modal over a noticeably blurred page, with the
+   reference proportions: header (icon · input · Clear · close), category
+   tabs, poster-based rows with expand chevrons and an independently
+   scrollable list. Skin follows the Liquid Glass language (frosted surface,
+   inset top rim, restrained shadows); animations respect reduced motion. */
+
+.search-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100; /* above the fixed navbar pill (z-50) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  /* Heavily blurred, darkened page behind the glass — depth without hiding
+     the cinematic anime background entirely. */
+  background-color: rgb(4 4 8 / 0.6);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  backdrop-filter: blur(28px) saturate(140%);
+}
+
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 680px;
+  max-height: min(86svh, 700px);
+  overflow: hidden;
+  border-radius: 26px;
+  /* Translucent dark glass surface — rgba(18, 18, 24, ~0.6) so the
+     blurred page behind stays subtly visible through the panel. */
+  border: 1px solid rgb(255 255 255 / 0.18);
+  background-color: rgba(18, 18, 24, 0.62);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+  box-shadow:
+    /* Soft inner glass highlight along the top edge. */
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 0 0 1px rgb(255 255 255 / 0.12),
+    /* Restrained outer shadow for floating depth. */
+    0 24px 60px rgb(0 0 0 / 0.45);
+}
+
+@supports not ((backdrop-filter: blur(28px)) or (-webkit-backdrop-filter: blur(28px))) {
+  /* Fallback for browsers without backdrop-filter: a slightly denser opaque
+     glass so the panel still reads as a separate surface. */
+  .search-panel {
+    background-color: rgba(18, 18, 24, 0.82);
+  }
+}
+
+@keyframes search-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes search-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes search-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes search-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.965);
+  }
+}
+
+.search-scrim[data-state="open"] {
+  animation: search-scrim-in 220ms ease both;
+}
+
+.search-scrim[data-state="closing"] {
+  animation: search-scrim-out 170ms ease both;
+}
+
+.search-panel[data-state="open"] {
+  animation: search-panel-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.search-panel[data-state="closing"] {
+  animation: search-panel-out 170ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-scrim[data-state],
+  .search-panel[data-state] {
+    animation: none;
+  }
+}
+
+/* Header row */
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px 18px;
+  /* Translucent header surface instead of solid. */
+  background: linear-gradient(to bottom,
+    rgb(255 255 255 / 0.06),
+    rgb(255 255 255 / 0.02));
+  border-bottom: 1px solid rgb(255 255 255 / 0.14);
+}
+
+.search-glyph {
+  display: flex;
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 0.55);
+}
+
+@keyframes search-spin {
+  to { transform: rotate(360deg); }
+}
+
+.search-spin {
+  animation: search-spin 900ms linear infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-spin {
+    animation: none;
+  }
+}
+
+.search-input {
+  min-width: 0;
+  flex: 1;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: #ffffff;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+}
+
+.search-input:focus-visible {
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: rgb(255 255 255 / 0.32);
+}
+
+.search-clear {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background-color: rgb(255 255 255 / 0.1);
+  color: rgb(255 255 255 / 0.9);
+  font-size: 13px;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.search-clear:hover {
+  background-color: rgb(255 255 255 / 0.18);
+  border-color: rgb(255 255 255 / 0.25);
+}
+
+.search-close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.75);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.search-close:hover {
+  background-color: rgb(255 255 255 / 0.16);
+  border-color: rgb(255 255 255 / 0.22);
+  color: #ffffff;
+}
+
+/* Category tabs */
+.search-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px 4px;
+}
+
+.search-tab {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  /* Inactive tabs: translucent dark glass. */
+  background-color: rgb(255 255 255 / 0.04);
+  color: rgb(255 255 255 / 0.5);
+  font-size: 13.5px;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.search-tab:hover {
+  background-color: rgb(255 255 255 / 0.08);
+  color: rgb(255 255 255 / 0.75);
+  border-color: rgb(255 255 255 / 0.18);
+}
+
+.search-tab--active {
+  /* Active tab: subtle light glass surface with dark text. */
+  background-color: rgb(255 255 255 / 0.85);
+  border-color: rgb(255 255 255 / 0.4);
+  color: #0b0b10;
+}
+
+.search-tab--active:hover {
+  background-color: rgb(255 255 255 / 0.92);
+  color: #0b0b10;
+}
+
+/* Results body — the panel is a flex column; this scrolls independently. */
+.search-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.search-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+}
+
+.search-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.search-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background: rgb(255 255 255 / 0.16);
+  background-clip: padding-box;
+}
+
+.search-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Result rows (popup + /search page) */
+.search-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px 10px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  /* Transparent surface by default. */
+  background-color: transparent;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.search-row:hover,
+.search-row--active {
+  /* Slightly brighter translucent glass highlight on hover / selection. */
+  background-color: rgb(255 255 255 / 0.07);
+}
+
+.search-row-poster {
+  display: block;
+  width: 56px;
+  aspect-ratio: 2 / 3;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: rgb(255 255 255 / 0.03);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+.search-row-poster--empty {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+@media (min-width: 640px) {
+  .search-row-poster {
+    width: 64px;
+  }
+}
+
+.search-row-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: rgb(255 255 255 / 0.92);
+}
+
+.search-row-meta {
+  display: block;
+  margin-top: 3px;
+  font-weight: 400;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.42);
+}
+
+.search-chev {
+  display: flex;
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 0.4);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 180ms ease;
+}
+
+button.search-chev:hover {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.search-chev--open {
+  transform: rotate(180deg);
+}
+
+/* Expanded panel — metadata from the backend only; never invention. */
+.search-row-panel {
+  padding: 2px 14px 10px;
+}
+
+.search-row-desc {
+  margin-top: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 0.55);
+}
+
+.search-row-desc--loading {
+  color: rgb(255 255 255 / 0.35);
+}
+
+.search-row-open {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.05);
+  color: rgb(255 255 255 / 0.85);
+  font-size: 12.5px;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.search-row-open:hover {
+  background-color: rgb(255 255 255 / 0.12);
+  border-color: rgb(255 255 255 / 0.2);
+}
+
+/* Empty / error / hint states */
+.search-hint {
+  padding: 28px 18px;
+  text-align: center;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.search-hint--soft {
+  padding: 14px 18px;
+}
+
+.search-state {
+  padding: 30px 18px;
+  text-align: center;
+}
+
+.search-state-title {
+  font-family: var(--font-heading);
+  font-weight: 300;
+  font-size: 20px;
+  color: rgb(255 255 255 / 0.92);
+}
+
+.search-state-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.search-similar-note {
+  padding: 10px 18px 2px;
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.search-footnote {
+  padding: 4px 18px 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: rgb(255 255 255 / 0.35);
+}
+
+.search-kbd {
+  padding: 1px 6px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 6px;
+  background-color: rgb(255 255 255 / 0.07);
+  color: rgb(255 255 255 / 0.8);
+  font-size: 12px;
+}
+
+/* Mobile — tighter chrome, slightly shorter panel. */
+@media (max-width: 639px) {
+  .search-panel {
+    max-height: 88svh;
+    border-radius: 20px;
+  }
+
+  .search-header {
+    padding: 12px 12px 10px 14px;
+  }
+
+  .search-tabs {
+    padding: 10px 12px 2px;
+  }
+
+  .search-row {
+    padding: 7px 8px;
+  }
+
+  .search-row-title {
+    font-size: 16.5px;
+  }
+
+  .search-row-poster {
+    width: 52px;
   }
 }

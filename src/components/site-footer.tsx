@@ -61,7 +61,7 @@ export default function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-8">
           {/* 1 — Branding, description, copyright (left) */}
           <div className="max-w-sm">
-            <p className="text-2xl font-black tracking-[-0.02em] text-white">
+            <p className="type-display text-[30px] sm:text-40px text-white">
               OFF<span className="text-white/55">ANIME</span>
             </p>
             <p className="mt-3 text-sm leading-relaxed text-white/60">
@@ -75,7 +75,7 @@ export default function SiteFooter() {
           {/* 2 — Navigation + contact (center) */}
           <div className="md:justify-self-center">
             <nav aria-label="Footer">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+              <p className="type-label text-xs uppercase text-white/40">
                 Navigate
               </p>
               <ul className="mt-4 space-y-2.5">
@@ -83,7 +83,7 @@ export default function SiteFooter() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm font-semibold text-white/65 underline-offset-4 transition-colors duration-200 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90"
+                      className="type-label text-[15px] text-white/65 underline-offset-4 transition-colors duration-200 hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90"
                     >
                       {link.label}
                     </Link>
@@ -93,7 +93,7 @@ export default function SiteFooter() {
             </nav>
             <a
               href={`mailto:${SITE_EMAIL}`}
-              className="glass-btn glass-btn--dark mt-6 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+              className="glass-btn glass-btn--dark type-label mt-6 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
             >
               <Mail className="h-3.5 w-3.5" aria-hidden="true" />
               {SITE_EMAIL}

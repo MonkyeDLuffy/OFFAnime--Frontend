@@ -22,3 +22,28 @@ export const SITE_TAGLINE =
  */
 export const HOSTING_DISCLAIMER =
   "OFFANIME does not host any files, it merely pulls streams from 3rd party services. Legal issues should be taken up with the file hosts and providers. OFFANIME is not responsible for any media files shown by the video providers.";
+
+/**
+ * Public production website URL used for canonical URLs, sitemap entries and
+ * Open Graph images. Configured via the `SITE_URL` server environment
+ * variable; defaults to the production domain `https://offanime.cc`.
+ *
+ * This is a server-only value — it is never exposed to the browser. Do not
+ * create a `NEXT_PUBLIC_` variant of it.
+ */
+export function getSiteUrl(): string {
+  return (
+    process.env.SITE_URL?.trim().replace(/\/+$/, "") ?? "https://offanime.cc"
+  );
+}
+
+/** Canonical URL for a path, always absolute HTTPS on the production host. */
+export function siteUrl(path: string): string {
+  const normalized = path.replace(/^\/+/, "");
+  return `${getSiteUrl()}/${normalized}`;
+}
+
+/** Canonical anime details URL keyed by AniList ID. */
+export function animeUrl(anilistId: number): string {
+  return siteUrl(`/anime/${anilistId}`);
+}

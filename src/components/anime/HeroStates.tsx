@@ -16,7 +16,7 @@ export function HeroLoadingState() {
       aria-label="Loading featured anime"
     >
       <div className="flex flex-col items-center gap-7">
-        <p className="animate-pulse text-xl font-semibold tracking-[0.55em] text-white/85 sm:text-2xl">
+        <p className="type-label animate-pulse text-xl text-white/85 sm:text-2xl">
           OFFANIME
         </p>
         <div className="h-px w-44 overflow-hidden bg-white/10">
@@ -66,7 +66,7 @@ export function HeroErrorState({ kind, status }: { kind: HeroErrorKind; status?:
     <section className="hero-viewport relative flex w-full items-center justify-center overflow-hidden bg-[#050507] px-6">
       <div className="max-w-md text-center">
         <TriangleAlert className="mx-auto h-8 w-8 text-white/45" aria-hidden="true" />
-        <h1 className="mt-5 text-xl font-semibold text-white">{title}</h1>
+        <h1 className="type-display mt-5 text-[30px] sm:text-36px lg:text-42px">{title}</h1>
         <p className="mt-2.5 text-sm leading-relaxed text-white/60">{description}</p>
         <RetryButton />
       </div>
@@ -78,7 +78,7 @@ export function HeroEmptyState() {
   return (
     <section className="hero-viewport relative flex w-full items-center justify-center overflow-hidden bg-[#050507] px-6">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold text-white">Nothing trending right now</h1>
+        <h1 className="type-display text-[30px] sm:text-36px lg:text-42px">Nothing trending right now</h1>
         <p className="mt-2.5 text-sm leading-relaxed text-white/60">
           The backend did not return any valid trending anime. Check back soon.
         </p>

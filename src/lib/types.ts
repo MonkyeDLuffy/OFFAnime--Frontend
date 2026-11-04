@@ -230,30 +230,152 @@ export interface EpisodesResponse {
 }
 
 /**
- * Recommendation entry from the anime details response.
- * Derived from the `recommendations` array in `/api/details/:id`.
+ * One entry of the recommendations data (VERIFIED against the live backend).
+ * NOTE: the fastest/accurate source is the dedicated endpoint
+ * `GET /api/recommendations/:id` — the `/api/details/:id` payload carries NO
+ * `recommendations` key.
+ *
+ * Entry keys (live, e.g. `/api/recommendations/1535`): `anilistId`, `id`,
+ * `malId`, `title`, `titleEnglish`, `titleRomaji`, `titleNative`, `images`
+ * (`{ poster, banner }`), `format`, `episodes` (null for some movies),
+ * `status`, `season`, `seasonYear`, `type`, `trailer` (null in practice so
+ * far), `rating` (AniList recommendation weight, sorted descending).
+ * There are NO `averageScore`, `genres` or `recommendationRating` keys.
  */
 export interface AnimeRecommendation {
+  /** AniList ID of the recommended anime (mirrors top-level `id`). */
   id: number;
   anilistId: number;
+  malId: number | null;
   title: string | null;
   titleEnglish: string | null;
   titleRomaji: string | null;
+  titleNative: string | null;
   images: {
     poster: string | null;
     banner: string | null;
   } | null;
   format: string | null;
-  episodes: number | null;
+  type: string | null;
   status: string | null;
+  season: string | null;
   seasonYear: number | null;
-  averageScore: number | null;
-  genres: string[];
-  recommendationRating: number | null;
+  episodes: number | null;
+  /** Unverified nested trailer object from the backend — intentionally not
+   * mapped into the card pipeline (the card treats null trailers gracefully). */
+  trailer: unknown;
+  /** AniList recommendation weight (higher = stronger recommendation). */
+  rating: number | null;
 }
 
-/** `GET /api/recommendations/:id` response shape (also available inline in `/api/details/:id`). */
-export interface RecommendationsResponse {
+/** `GET /api/recommendations/:id` returns the BARE ARRAY of entries (not a
+ * wrapper object) — verified live. The alias keeps call sites readable. */
+export type RecommendationsResponse = AnimeRecommendation[];
+
+/**
+ * One related-anime entry of `GET /api/seasons/:id` (VERIFIED live, e.g.
+ * `/api/seasons/1735`). Every relation group (prequels, sequels, sideStories,
+ * spinOffs, alternativeVersions, parentStory — an ARRAY, not a single object —
+ * and other) plus every `formatGroups` bucket (`tv`, `ova`, `ona`, `movies`,
+ * `specials`, `otherFormats`) carries entries of this same shape. The self
+ * entry `anime` uses the same shape but omits relationType/relationLabel,
+ * averageScore, genres, `images.cover` and seasonYear (display year for the
+ * current anime comes from the details payload instead).
+ */
+export interface SeasonEntry {
+  id: number;
   anilistId: number;
-  recommendations: AnimeRecommendation[];
+  malId: number | null;
+  title: string | null;
+  titleEnglish: string | null;
+  titleRomaji: string | null;
+  titleNative: string | null;
+  type: string | null;
+  format: string | null;
+  status: string | null;
+  /** null for some entries (e.g. not-yet-released seasons). */
+  episodes: number | null;
+  season: string | null;
+  seasonYear: number | null;
+  averageScore: number | null;
+  genres: string[] | null;
+  images: {
+    poster: string | null;
+    cover: string | null;
+    banner: string | null;
+  } | null;
+  /** `"PREQUEL" | "SEQUEL" | ...` — null on the self `anime` entry. */
+  relationType: string | null;
+  /** Human label, verified `"Prequel"` / `"Sequel"`. */
+  relationLabel: string | null;
+}
+
+/** `GET /api/seasons/:id` response (VERIFIED shape; `:id` is the AniList ID). */
+export interface SeasonsResponse {
+  success: boolean;
+  totalRelated: number;
+  anime: SeasonEntry | null;
+  prequels: SeasonEntry[];
+  sequels: SeasonEntry[];
+  sideStories: SeasonEntry[];
+  spinOffs: SeasonEntry[];
+  alternativeVersions: SeasonEntry[];
+  parentStory: SeasonEntry[];
+  other: SeasonEntry[];
+  formatGroups: {
+    tv: SeasonEntry[];
+    ova: SeasonEntry[];
+    ona: SeasonEntry[];
+    movies: SeasonEntry[];
+    specials: SeasonEntry[];
+    otherFormats: SeasonEntry[];
+  } | null;
+}
+
+/* ---- Search ----------------------------------------------------------------
+   Shared by the navbar search popup and the dedicated /search page. Shapes
+   modeled on the backend's search normalizer (backend.md §6, §7): search
+   results use the card family (title string, images, format, season) and are
+   NOT the full Anime details payload — no description/averageScore. Expanded
+   rows that want a description fetch `/api/details/:id` lazily (never guessing
+   metadata the search endpoint itself does not return). */
+
+/** `GET /api/search` pageInfo. */
+export interface SearchPageInfo {
+  total: number | null;
+  currentPage: number | null;
+  lastPage: number | null;
+  hasNextPage: boolean;
+  perPage: number | null;
+}
+
+/** One `GET /api/search` result — a normalized AniList anime card. */
+export interface SearchCard {
+  /** AniList ID — the canonical identity for routing to /anime/:id. */
+  id: number;
+  anilistId: number;
+  malId: number | null;
+  /** Backend display string (English-first). */
+  title: string | null;
+  titleEnglish: string | null;
+  titleRomaji: string | null;
+  titleNative: string | null;
+  type: string | null;
+  format: string | null;
+  status: string | null;
+  episodes: number | null;
+  season: string | null;
+  seasonYear: number | null;
+  images: {
+    poster: string | null;
+    banner: string | null;
+  };
+  /** Not requested on search cards in older cached payloads — optional. */
+  trailer?: AnimeTrailer | null;
+}
+
+/** `GET /api/search` response shape (`{ pageInfo, results }`). */
+export interface SearchResponse {
+  pageInfo: SearchPageInfo;
+  results: SearchCard[];
 }

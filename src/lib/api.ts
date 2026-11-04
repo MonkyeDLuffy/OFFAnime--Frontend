@@ -1,6 +1,15 @@
 import "server-only";
 
-import type { Anime, ApiResult, HomeFeed, TmdbVisuals, EpisodesResponse, AnimeRecommendation } from "./types";
+import type {
+  Anime,
+  ApiResult,
+  HomeFeed,
+  TmdbVisuals,
+  EpisodesResponse,
+  SearchCard,
+  SearchResponse,
+} from "./types";
+import { pickSimilarResults } from "./text-similarity";
 
 /**
  * Server-side client for the OffAnime backend (backend.md §5, §10).
@@ -217,39 +226,6 @@ export function getAnimeEpisodes(anilistId: number): Promise<ApiResult<EpisodesR
 }
 
 /**
- * Extract recommendations from an anime details response.
- * The `/api/details/:id` response already includes a `recommendations` array.
- * This helper normalizes the raw recommendations into the `AnimeRecommendation` shape.
- */
-export function extractRecommendations(
-  detailsResponse: { recommendations?: unknown } | null,
-): AnimeRecommendation[] {
-  if (!detailsResponse || !Array.isArray(detailsResponse.recommendations)) {
-    return [];
-  }
-  return detailsResponse.recommendations
-    .filter((rec): rec is Record<string, unknown> => {
-      if (!rec || typeof rec !== "object") return false;
-      return typeof rec.id === "number" && rec.id > 0;
-    })
-    .map((rec) => ({
-      id: rec.id as number,
-      anilistId: (rec.anilistId as number) ?? (rec.id as number),
-      title: rec.title as string | null,
-      titleEnglish: rec.titleEnglish as string | null,
-      titleRomaji: rec.titleRomaji as string | null,
-      images: rec.images as { poster: string | null; banner: string | null } | null,
-      format: rec.format as string | null,
-      episodes: rec.episodes as number | null,
-      status: rec.status as string | null,
-      seasonYear: rec.seasonYear as number | null,
-      averageScore: rec.averageScore as number | null,
-      genres: Array.isArray(rec.genres) ? rec.genres.filter((g): g is string => typeof g === "string") : [],
-      recommendationRating: rec.recommendationRating as number | null,
-    }));
-}
-
-/**
  * Runs `handler` for each unique AniList ID with bounded concurrency.
  * Every item is failure-isolated by the caller (handler returns null on
  * error) so one bad slide can never break the whole batch.
@@ -307,4 +283,80 @@ export async function fetchAnimeDetailsBatch(
     const result = await getAnimeDetails(anilistId);
     return result.ok ? result.data : null;
   });
+}
+
+/* ---- Search (dedicated /search page) ---------------------------------------
+   Server twin of `src/lib/search-client.ts`: identical fallback semantics,
+   rendered through the SearchRequestOutcome shape below. Requests reuse
+   `requestJson` with the backend's MEDIUM TTL preset (search/listings, 300s),
+   which also matches the backend's own per-query cache: revisits touch the
+   Data Cache instead of AniList. No retries (attempts defaults to 1). */
+
+export const SEARCH_MIN_QUERY_LENGTH = 2;
+export const SEARCH_QUERY_MAX_LENGTH = 200;
+export const SEARCH_PER_PAGE = 20;
+export const SIMILAR_RESULTS_MAX = 6;
+/** Backend listings preset: TTL MEDIUM + the shared 10s deadline. */
+const SEARCH_REVALIDATE_SECONDS = 300;
+
+/**
+ * One logical search for the /search page (typed, never throws).
+ *  - exact results  → `kind: "results"` (backend SEARCH_MATCH ranking);
+ *  - `total: 0`     → ONE popularity-pool request scored locally (typo
+ *                     tolerance from real backend data only) → "similar";
+ *  - nothing close  → "empty".
+ */
+export type SearchRequestOutcome =
+  | { kind: "results"; results: SearchCard[]; total: number }
+  | { kind: "similar"; results: SearchCard[]; total: number }
+  | { kind: "empty" }
+  | { kind: "error" };
+
+export async function searchAnimeWithTypoFallback(
+  query: string,
+): Promise<SearchRequestOutcome> {
+  const trimmed = query.trim().slice(0, SEARCH_QUERY_MAX_LENGTH);
+
+  const primary = await requestJson<SearchResponse>(
+    `/search?q=${encodeURIComponent(trimmed)}&perPage=${SEARCH_PER_PAGE}`,
+    SEARCH_REVALIDATE_SECONDS,
+    HOME_TIMEOUT_MS,
+  );
+  if (primary.ok) {
+    if (primary.data.results.length > 0) {
+      return {
+        kind: "results",
+        results: primary.data.results,
+        total: primary.data.pageInfo?.total ?? primary.data.results.length,
+      };
+    }
+  } else {
+    // Unconfigured/timeout/network/HTTP — surface honestly, never manufacture.
+    return { kind: "error" };
+  }
+
+  // Primary returned zero rows → typo-tolerant fallback over the popularity
+  // pool (same endpoint family; the pooled page is cached server-side and
+  // shared by every misspelled query — one logical extra request).
+  const pool = await requestJson<SearchResponse>(
+    `/search?perPage=50&sort=POPULARITY_DESC`,
+    SEARCH_REVALIDATE_SECONDS,
+    HOME_TIMEOUT_MS,
+  );
+  if (pool.ok) {
+    const similar = pickSimilarResults(
+      trimmed,
+      pool.data.results,
+      SIMILAR_RESULTS_MAX,
+    );
+    if (similar.length > 0) {
+      return {
+        kind: "similar",
+        results: similar.map((entry) => entry.card),
+        total: similar.length,
+      };
+    }
+    return { kind: "empty" };
+  }
+  return { kind: "error" };
 }

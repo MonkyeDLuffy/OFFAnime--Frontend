@@ -36,7 +36,7 @@ function SectionHeading() {
     <div className="relative px-6 sm:px-10 lg:px-16 xl:px-24">
       <h2
         id="trending-heading"
-        className="text-2xl font-black tracking-[-0.01em] text-white sm:text-3xl lg:text-4xl"
+        className="type-display text-[27px] sm:text-34px lg:text-40px"
       >
         Trending Anime
       </h2>

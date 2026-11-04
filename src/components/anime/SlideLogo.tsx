@@ -52,7 +52,7 @@ export default function SlideLogo({
 
 export function TitleHeading({ title }: { title: string }) {
   return (
-    <h1 className="max-w-2xl text-3xl font-bold leading-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.6)] sm:text-5xl lg:text-6xl">
+    <h1 className="type-display max-w-2xl text-4xl text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.6)] sm:text-5xl lg:text-[52px]">
       {title}
     </h1>
   );

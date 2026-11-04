@@ -25,10 +25,23 @@ const UPSTREAM_TIMEOUT_MS = 15_000;
 
 /** GET/HEAD-allowlisted paths, relative to `/api` (backend.md §6). */
 const ALLOWED_READ_PATH =
-  /^(?:health|home|schedule|search|top-search|details|smart\/details|episodes|recommendations|seasons|category|stream\/resolve|jikan\/anime|jikan\/from-anilist|tmdb)(?:\/.*)?$/;
+  /^(?:health|home|schedule|search|top-search|details|smart\/details|episodes|recommendations|seasons|category|stream\/resolve|stream\/mal|jikan\/anime|jikan\/from-anilist|tmdb)(?:\/.*)?$/;
 
 /** Auth endpoints additionally accept POST bodies (backend.md §6). */
 const ALLOWED_AUTH_PATH = /^auth(?:\/.*)?$/;
+
+/**
+ * User-data endpoints — the REAL account watchlist and continue-watching
+ * history (backend.md §watchlist; src/routes/watchlist.routes.js,
+ * src/routes/continue-watching.routes.js). The backend derives identity
+ * ONLY from the verified session and enforces RLS, so the proxy must simply
+ * forward the session with the injected API key. DELETE is required for
+ * removal; paths are strictly bounded (`watchlist`, `watchlist/:animeId`,
+ * `user/continue-watching`, `user/continue-watching/:anilistId` only — never
+ * an open proxy).
+ */
+const ALLOWED_USER_DATA_PATH =
+  /^(?:watchlist(?:\/\d+)?|user\/continue-watching(?:\/\d+)?)$/;
 
 function proxyError(status: number, code: string, message: string): NextResponse {
   return NextResponse.json(
@@ -63,12 +76,17 @@ async function proxyRequest(request: NextRequest): Promise<NextResponse> {
 
   const isAuthPath = ALLOWED_AUTH_PATH.test(relativePath);
   const isReadPath = ALLOWED_READ_PATH.test(relativePath);
+  const isUserDataPath = ALLOWED_USER_DATA_PATH.test(relativePath);
 
-  if (!isAuthPath && !isReadPath) {
+  if (!isAuthPath && !isReadPath && !isUserDataPath) {
     return proxyError(404, "NOT_FOUND", "Requested path is not allowlisted.");
   }
 
-  const allowedMethods = isAuthPath ? ["GET", "POST"] : ["GET", "HEAD"];
+  const allowedMethods = isAuthPath
+    ? ["GET", "POST"]
+    : isUserDataPath
+      ? ["GET", "POST", "DELETE"] // real watchlist: read, add, remove
+      : ["GET", "HEAD"];
   if (!allowedMethods.includes(method)) {
     return proxyError(
       405,
@@ -139,3 +157,5 @@ async function proxyRequest(request: NextRequest): Promise<NextResponse> {
 
 export const GET = proxyRequest;
 export const POST = proxyRequest;
+/** Watchlist removal (DELETE /api/watchlist/:animeId) — explicitly exported. */
+export const DELETE = proxyRequest;

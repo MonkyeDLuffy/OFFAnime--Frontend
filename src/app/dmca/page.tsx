@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Scale } from "lucide-react";
-import { HOSTING_DISCLAIMER, SITE_EMAIL } from "@/lib/site";
+import { HOSTING_DISCLAIMER, SITE_EMAIL, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "DMCA Policy",
   description:
     "How to submit a copyright takedown notice to OFFAnime — requirements, process and contact address.",
+  alternates: { canonical: siteUrl("/dmca") },
+  openGraph: {
+    title: "DMCA Policy — OFFANIME",
+    description:
+      "How to submit a copyright takedown notice to OFFAnime — requirements, process and contact address.",
+    url: siteUrl("/dmca"),
+    siteName: "OFFANIME",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "DMCA Policy — OFFANIME",
+    description:
+      "How to submit a copyright takedown notice to OFFAnime — requirements, process and contact address.",
+  },
 };
 
 /** The exact good-faith statement a notice must contain. */
@@ -68,10 +83,10 @@ export default function DmcaPage() {
 
       {/* Top padding clears the fixed navbar (56/64px) with breathing room. */}
       <div className="relative mx-auto max-w-3xl px-6 pb-16 pt-24 sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 xl:px-24">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+        <p className="type-label text-[11px] uppercase text-white/40">
           Legal
         </p>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.02em] text-white sm:text-5xl">
+        <h1 className="type-display mt-4 text-[36px] sm:text-48px text-white">
           DMCA Policy &amp; Takedown Requests
         </h1>
 
@@ -92,7 +107,7 @@ export default function DmcaPage() {
         <section aria-labelledby="dmca-requirements" className="mt-14">
           <h2
             id="dmca-requirements"
-            className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+            className="type-display text-xl text-white sm:text-2xl"
           >
             What a complete takedown notice includes
           </h2>
@@ -106,12 +121,12 @@ export default function DmcaPage() {
               <li key={requirement.title} className="flex gap-4">
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/[0.06] text-sm font-bold text-white/85"
+                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/[0.06] type-label text-sm text-white/85"
                 >
                   {index + 1}
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-white">
+                  <h3 className="type-display text-base text-white">
                     {requirement.title}
                   </h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-white/60">
@@ -132,7 +147,7 @@ export default function DmcaPage() {
         <section aria-labelledby="dmca-submit" className="mt-14">
           <h2
             id="dmca-submit"
-            className="text-xl font-bold tracking-[-0.01em] text-white sm:text-2xl"
+            className="type-display text-xl text-white sm:text-2xl"
           >
             Submit your request
           </h2>
@@ -143,7 +158,7 @@ export default function DmcaPage() {
             get your request handled.
           </p>
           <div className="mt-6 rounded-3xl border border-white/12 bg-white/[0.04] p-6 backdrop-blur-md sm:p-8">
-            <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/40">
+            <p className="flex items-center gap-2.5 type-label text-[11px] uppercase text-white/40">
               <Mail className="h-3.5 w-3.5" aria-hidden="true" />
               Copyright requests
             </p>
@@ -151,7 +166,7 @@ export default function DmcaPage() {
               href={`mailto:${SITE_EMAIL}?subject=${encodeURIComponent(
                 "[OFFAnime] DMCA Takedown Request",
               )}`}
-              className="mt-4 inline-block break-all text-lg font-bold text-white underline decoration-white/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90 sm:text-2xl"
+              className="type-display mt-4 inline-block break-all text-lg text-white underline decoration-white/25 decoration-2 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90 sm:text-2xl"
             >
               {SITE_EMAIL}
             </a>
@@ -173,7 +188,7 @@ export default function DmcaPage() {
           <div>
             <h2
               id="dmca-scope"
-              className="text-base font-bold text-white"
+              className="type-display text-base text-white"
             >
               Please note
             </h2>

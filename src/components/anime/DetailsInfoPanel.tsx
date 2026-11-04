@@ -55,7 +55,7 @@ export default function DetailsInfoPanel({
               index > 0 ? "border-t border-white/10" : ""
             }`}
           >
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+            <dt className="type-label text-xs uppercase text-white/50">
               {row.label}
             </dt>
             <dd className="text-right text-sm font-medium text-white/90">

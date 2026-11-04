@@ -2,15 +2,22 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import AnimeDetailsHero from "@/components/anime/AnimeDetailsHero";
 import EpisodesCarousel from "@/components/anime/EpisodesCarousel";
+import SeasonsCarousel from "@/components/anime/SeasonsCarousel";
 import { HeroErrorState } from "@/components/anime/HeroStates";
 import {
   buildDetailsHeroSlide,
   getAnimeTrailerSource,
-  getDisplayDescription,
-  getDisplayTitle,
 } from "@/lib/anime";
-import { extractRecommendations, getAnimeDetails, getAnimeEpisodes, getHomeFeed, getTmdbVisuals } from "@/lib/api";
+import { getAnimeDetails, getAnimeEpisodes, getHomeFeed, getTmdbVisuals } from "@/lib/api";
 import type { EpisodesResponse, TrailerSource } from "@/lib/types";
+import { animeDetailsMetadata } from "@/lib/seo";
+import { animeUrl } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  movieJsonLd,
+  tvSeriesJsonLd,
+} from "@/lib/structured-data";
+import { getDisplayTitle } from "@/lib/anime";
 import RecommendedCarousel from "@/components/anime/RecommendedCarousel";
 
 /**
@@ -56,11 +63,7 @@ export async function generateMetadata({
   const details = await getAnimeDetails(anilistId);
   if (!details.ok) return {};
 
-  const description = getDisplayDescription(details.data);
-  return {
-    title: getDisplayTitle(details.data),
-    description: description?.slice(0, 200) ?? undefined,
-  };
+  return animeDetailsMetadata(details.data);
 }
 
 export default async function AnimeDetailsPage({
@@ -87,6 +90,16 @@ export default async function AnimeDetailsPage({
 
   const anime = details.data;
 
+  const canonicalUrl = animeUrl(anime.anilistId);
+
+  // Page-specific JSON-LD structured data (server-rendered, real backend data).
+  // Organization + WebSite are emitted globally by the root layout.
+  const jsonLd = [
+    breadcrumbJsonLd(getDisplayTitle(anime), canonicalUrl),
+    tvSeriesJsonLd(anime, canonicalUrl),
+    movieJsonLd(anime, canonicalUrl),
+  ].filter(Boolean).join("");
+
   // Banner/logo enrichment (24h cache; failure → AniList banner fallback
   // chain, logo → title heading — never fatal).
   const visuals = await getTmdbVisuals(anilistId);
@@ -96,12 +109,18 @@ export default async function AnimeDetailsPage({
   const episodesResult = await getAnimeEpisodes(anilistId);
   const episodesData: EpisodesResponse | null = episodesResult.ok ? episodesResult.data : null;
 
-  // Recommendations from the details response (already fetched above).
-  // The Anime type from the details response includes the recommendations array.
-  const recommendations = extractRecommendations(details.data as { recommendations?: unknown } | null);
-
+  // Recommended Anime + Seasons are fetched CLIENT-SIDE through the same-
+  // origin proxy (`GET /api/recommendations/:anilistId`,
+  // `GET /api/seasons/:anilistId`) inside their carousel components.
+  // The details payload carries no recommendations key, so nothing is read
+  // from it here. `anime.seasonYear` feeds only the Seasons section's
+  // "current season" year chip (the seasons endpoint's self entry has none).
   return (
     <main>
+      <div
+        dangerouslySetInnerHTML={{ __html: jsonLd }}
+        aria-hidden="true"
+      />
       <AnimeDetailsHero
         slide={slide}
         info={anime}
@@ -113,8 +132,12 @@ export default async function AnimeDetailsPage({
         error={!episodesResult.ok}
         anilistId={anilistId}
       />
+      <SeasonsCarousel
+        anilistId={anilistId}
+        currentSeasonYear={anime.seasonYear}
+      />
       <RecommendedCarousel
-        recommendations={recommendations}
+        anilistId={anilistId}
       />
     </main>
   );

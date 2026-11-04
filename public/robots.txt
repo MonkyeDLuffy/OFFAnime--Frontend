@@ -1,0 +1,21 @@
+# OffAnime robots.txt
+# Public crawling policy
+
+User-agent: *
+Allow: /
+Allow: /_next/static/
+Allow: /fonts/
+Allow: /anime/
+
+# Private / non-indexable areas
+Disallow: /account/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /watchlist
+Disallow: /anime/*/watch
+Disallow: /api/
+Disallow: /search/*
+
+Sitemap: https://offanime.cc/sitemap.xml

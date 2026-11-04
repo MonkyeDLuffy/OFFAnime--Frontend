@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { homepageMetadata } from "@/lib/seo";
 import AnimeHero from "@/components/anime/AnimeHero";
 import PopularSection from "@/components/anime/PopularSection";
 import SeasonalSection from "@/components/anime/SeasonalSection";
@@ -10,6 +11,7 @@ import TrendingSection, {
   TrendingSectionSkeleton,
 } from "@/components/anime/TrendingSection";
 import { HeroLoadingState } from "@/components/anime/HeroStates";
+import ContinueWatchingSection from "@/components/continue-watching/ContinueWatchingSection";
 
 /**
  * Anime homepage. The hero slider data is fetched server-side (backend
@@ -24,11 +26,7 @@ import { HeroLoadingState } from "@/components/anime/HeroStates";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Anime",
-  description:
-    "Stream trending anime on OffAnime — a cinematic, premium anime experience.",
-};
+export const metadata: Metadata = homepageMetadata();
 
 export default function AnimeHomePage() {
   return (
@@ -43,6 +41,9 @@ export default function AnimeHomePage() {
       </Suspense>
       <Suspense fallback={null}>
         <TopTenSection />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ContinueWatchingSection />
       </Suspense>
       <Suspense fallback={null}>
         <PopularSection />

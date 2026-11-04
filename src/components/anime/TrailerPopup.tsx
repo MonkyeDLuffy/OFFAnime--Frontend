@@ -269,7 +269,7 @@ export default function TrailerPopup({
 
       {/* Info area — the same actions as the card's hover panel. */}
       <div className="px-4 pb-4 pt-3">
-        <p className="truncate text-sm font-semibold text-white">
+        <p className="type-label truncate text-[17px] text-white">
           {entry.title}
         </p>
         {metaLabel ? (
@@ -292,6 +292,8 @@ export default function TrailerPopup({
               anilistId: entry.anilistId,
               title: entry.title,
               posterUrl: entry.posterUrl,
+              year: entry.year,
+              format: entry.format,
             }}
             className="h-11 w-11"
           />

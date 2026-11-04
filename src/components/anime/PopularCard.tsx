@@ -15,7 +15,7 @@ const POSTER_SIZES =
   "(min-width: 1536px) 300px, (min-width: 1280px) 290px, (min-width: 1024px) 280px, (min-width: 768px) 260px, (min-width: 640px) 240px, 58vw";
 
 /** Raw AniList format values → compact display labels. */
-function describeFormat(format: string | null): string | null {
+export function describeFormat(format: string | null): string | null {
   if (!format) return null;
   switch (format) {
     case "TV":
@@ -90,6 +90,7 @@ export default function PopularCard({ entry }: { entry: PopularEntry }) {
     failedCount < candidates.length ? candidates[failedCount] : null;
 
   const detailsUrl = `/anime/${entry.anilistId}`;
+  const watchUrl = `/anime/${entry.anilistId}/watch?ep=1&language=sub`;
   const metaParts = [
     describeFormat(entry.format),
     entry.year !== null ? String(entry.year) : null,
@@ -168,7 +169,7 @@ export default function PopularCard({ entry }: { entry: PopularEntry }) {
           <div
             className={`pointer-events-none absolute inset-x-0 top-[calc(100%-12px)] z-10 -translate-y-1 rounded-b-xl border border-t-0 border-white/10 bg-[#0b0b11] px-3 pb-3 pt-2.5 opacity-0 shadow-[0_18px_40px_rgba(0,0,0,0.6)] transition-[opacity,transform] duration-300 ease-out delay-100 group-hover/pop:pointer-events-auto group-hover/pop:translate-y-0 group-hover/pop:opacity-100 group-focus-within/pop:pointer-events-auto group-focus-within/pop:translate-y-0 group-focus-within/pop:opacity-100`}
           >
-            <p className="truncate text-sm font-semibold text-white">
+            <p className="type-label truncate text-[17px] text-white">
               {entry.title}
             </p>
             {metaParts.length > 0 ? (
@@ -178,7 +179,7 @@ export default function PopularCard({ entry }: { entry: PopularEntry }) {
             ) : null}
             <div className="mt-2.5 flex items-center gap-2">
               <Link
-                href={detailsUrl}
+                href={watchUrl}
                 aria-label={`Play ${entry.title}`}
                 title="Play"
                 className="glass-btn glass-btn--bright flex h-11 w-11 items-center justify-center rounded-full"
@@ -190,6 +191,8 @@ export default function PopularCard({ entry }: { entry: PopularEntry }) {
                   anilistId: entry.anilistId,
                   title: entry.title,
                   posterUrl: entry.posterUrl,
+                  year: entry.year,
+                  format: entry.format,
                 }}
                 className="h-11 w-11"
               />

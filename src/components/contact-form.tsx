@@ -96,7 +96,7 @@ export default function ContactForm() {
           <div>
             <label
               htmlFor="contact-name"
-              className="mb-2 block text-sm font-semibold text-white/80"
+              className="type-label mb-2 block text-sm text-white/80"
             >
               Name <span className="text-white/40">*</span>
             </label>
@@ -122,7 +122,7 @@ export default function ContactForm() {
           <div>
             <label
               htmlFor="contact-email"
-              className="mb-2 block text-sm font-semibold text-white/80"
+              className="type-label mb-2 block text-sm text-white/80"
             >
               Email <span className="text-white/40">*</span>
             </label>
@@ -151,7 +151,7 @@ export default function ContactForm() {
         <div>
           <label
             htmlFor="contact-subject"
-            className="mb-2 block text-sm font-semibold text-white/80"
+            className="type-label mb-2 block text-sm text-white/80"
           >
             Subject <span className="text-white/40">*</span>
           </label>
@@ -178,7 +178,7 @@ export default function ContactForm() {
         <div>
           <label
             htmlFor="contact-message"
-            className="mb-2 block text-sm font-semibold text-white/80"
+            className="type-label mb-2 block text-sm text-white/80"
           >
             Message <span className="text-white/40">*</span>
           </label>
@@ -204,7 +204,7 @@ export default function ContactForm() {
 
         <button
           type="submit"
-          className="glass-btn glass-btn--bright inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-bold text-[#0b0b0f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+          className="glass-btn glass-btn--bright type-label inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm text-[#0b0b0f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
         >
           <Send className="h-4 w-4" aria-hidden="true" />
           Compose Email
@@ -223,7 +223,7 @@ export default function ContactForm() {
       <div aria-live="polite">
         {status === "composed" ? (
           <div className="mt-6 rounded-2xl border border-white/15 bg-white/[0.04] p-5 backdrop-blur-md">
-            <p className="text-sm font-semibold text-white">
+            <p className="type-label text-sm text-white">
               Your email app should now be open with everything pre-filled.
             </p>
             <p className="mt-2 text-sm leading-relaxed text-white/60">
@@ -234,7 +234,7 @@ export default function ContactForm() {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <a
                 href={composedMailto}
-                className="glass-btn inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
+                className="glass-btn type-label inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/90"
               >
                 <Mail className="h-3.5 w-3.5" aria-hidden="true" />
                 Open your email app again

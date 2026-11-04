@@ -114,6 +114,25 @@ function YouTubePreview({
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const [playerReady, setPlayerReady] = useState(false);
+  // The caller's desired mute state, mirrored in a ref so it can be applied
+  // to the live player (on ready and on every toggle) without ever
+  // re-creating the embed. Muting is driven purely through the Player API.
+  const desiredMutedRef = useRef(muted);
+  desiredMutedRef.current = muted;
+
+  /** Apply the current desired mute state to a live player, no reload. */
+  const applyMute = useCallback((player: YouTubePlayer) => {
+    try {
+      if (desiredMutedRef.current) {
+        player.mute();
+      } else {
+        player.unMute();
+        player.setVolume(100);
+      }
+    } catch {
+      // The player was torn down mid-toggle; the unmount cleanup handles it.
+    }
+  }, []);
 
   useEffect(() => {
     // The Player API replaces its target element with an iframe; a plain
@@ -127,10 +146,10 @@ function YouTubePreview({
     let cancelled = false;
     const playerVars: Partial<YouTubePlayerVars> = {
       autoplay: 1,
-      // Starts unmuted when the caller permits it; browsers may still refuse
-      // unmuted autoplay, in which case we fall back to muted and surface a
-      // visible cue.
-      mute: muted ? 1 : 0,
+      // Always start the embed muted — autoplay-safe. The live toggle below
+      // flips audio through the API without reloading or restarting the
+      // player, so the caller's desired state is honored after readiness.
+      mute: 1,
       playsinline: 1,
       controls: 0,
       disablekb: 1,
@@ -155,7 +174,9 @@ function YouTubePreview({
           events: {
             onReady: (event) => {
               if (cancelled) return;
-              event.target.mute();
+              // Honor the caller's desired state instead of forcing mute:
+              // muting is applied through the API, in sync with the toggle.
+              applyMute(event.target);
               event.target.playVideo();
               setPlayerReady(true);
               // This popup is the master clock for the ambient backdrop:
@@ -173,14 +194,14 @@ function YouTubePreview({
               if (event.data === PLAYER_STATE_PLAYING) {
                 onPlaying();
                 // Unmuted playback detected: audio is actually flowing.
-                if (!muted) setPlayingUnmuted(true);
+                if (!desiredMutedRef.current) setPlayingUnmuted(true);
               }
               // Autoplay refused unmuted: the player lands in PAUSED (2)
               // instead of PLAYING (1). Fall back to muted playback and let
               // the caller show a visible unmute cue.
               if (
                 event.data === 2 &&
-                !muted &&
+                !desiredMutedRef.current &&
                 !cancelled &&
                 onAutoplayBlocked
               ) {
@@ -210,23 +231,15 @@ function YouTubePreview({
       playerRef.current = null;
       target.remove();
     };
-  }, [source.videoId, muted, onPlaying, onFailed, onAutoplayBlocked, setPlayingUnmuted]);
+  }, [source.videoId, applyMute, onPlaying, onFailed, onAutoplayBlocked, setPlayingUnmuted]);
 
-  // Mute/unmute through the API — no reload, no restart, playback continues.
+  // Mute/unmute through the API on the live player — no reload, no restart,
+  // playback continues. Never re-creates the embed.
   useEffect(() => {
     const player = playerRef.current;
     if (!playerReady || !player) return;
-    try {
-      if (muted) {
-        player.mute();
-      } else {
-        player.unMute();
-        player.setVolume(100);
-      }
-    } catch {
-      // The player was torn down mid-toggle; the unmount cleanup handles it.
-    }
-  }, [muted, playerReady]);
+    applyMute(player);
+  }, [muted, playerReady, applyMute]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }
