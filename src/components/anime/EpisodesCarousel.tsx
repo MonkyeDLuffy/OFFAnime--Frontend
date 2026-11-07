@@ -115,6 +115,7 @@ export default function EpisodesCarousel({
                       <EpisodeCard
                         key={episode.globalEpisodeNumber}
                         episode={episode}
+                        anilistId={anilistId}
                       />
                     );
                   })}

@@ -188,12 +188,17 @@ export default function SeasonsCarousel({
             SEASONS
           </h2>
 
-          <div className="relative mt-8 sm:mt-10 details-section-carousel">
+          {/* Row wrapper — same idiom as PopularRow/EpisodesCarousel: the
+              reserved bottom padding hosts the cards' hover lift, and the
+              negative bottom margin hands the empty part of that
+              reservation back so the next section (Recommended Anime) sits
+              a balanced distance below the cards instead of ~200px. */}
+          <div className="relative mt-8 -mb-8 sm:mt-10 sm:-mb-12 details-section-carousel">
             <ul
               ref={scrollerRef}
               role="list"
               aria-label={listLabel}
-              className="no-scrollbar flex gap-4 overflow-x-auto overflow-y-clip overscroll-x-contain px-6 pb-36 pt-4 sm:gap-5 sm:px-10 sm:pb-40 lg:gap-6 lg:px-16 xl:px-24"
+              className="no-scrollbar flex gap-4 overflow-x-auto overflow-y-clip overscroll-x-contain px-6 pb-16 pt-4 sm:gap-5 sm:px-10 sm:pb-20 lg:gap-6 lg:px-16 xl:px-24"
             >
               {cards.map((card) => (
                 <SeasonCard key={card.anilistId} card={card} />
